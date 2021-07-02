@@ -1,6 +1,8 @@
 const express = require('express');
 const db = require('./db/connection');
 const apiRoutes = require('./routes/apiRoutes');
+const fetch = require('node-fetch');
+
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -23,5 +25,14 @@ db.connect(err => {
   console.log('Database connected.');
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+
+    fetch("http://localhost:3001/api/employee")
+    .then(response => {
+      return response.json();
+    })
+    .then(response => {
+      console.log(response.data[1].first_name);
+    })
   });
 });
+
