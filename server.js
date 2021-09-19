@@ -22,9 +22,9 @@ app.use((req, res) => {
 // Start server after DB connection
 db.connect(err => {
   if (err) throw err;
-  console.log('Database connected.');
+//   console.log('Database connected.');
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    // console.log(`Server running on port ${PORT}`);
   });
 });
 
@@ -34,8 +34,9 @@ function viewDepartments (){
   db.query(sql, (err, rows)=>{
       if(err) throw err;
       console.table('\n',rows,'\n');
+      main();
   });    
-  main();
+  
 };
 
 function addDepartment(){
@@ -51,34 +52,10 @@ function addDepartment(){
 
       db.query(sql, params, (err, result)=>{
           if(err) throw err;
-          console.log(`\n ${newDept.deptName} has been added.`)
-          });
-      main();
-  });
-};
-
-function deleteDepartmenmt(){
-  db.query(`SELECT*FROM departments`, (err, res)=>{
-      if(err) throw err;
-      const departmentList = res.map(departments => ({name:departments.name, value:departments.id}));
-      return inquirer.prompt([
-          {
-              type:'list',
-              name:'department',
-              message:'What department do you wish to remove?',
-              choices: departmentList
-          }
-      ]).then(delDept=>{
-          const sql = `DELETE FROM departments WHERE id = ?`;
-          const params = delDept.department
-          db.query(sql, params, (err, result)=>{
-              if(err) throw err;
-              console.log(`\nDepartment Removed\n`)
-          });
+          console.log(`\n ${newDept.deptName} has been added.`);
           main();
-      })
-  })
-};
+          });
+})};
 
 function viewRoles(){
   const sql = `SELECT*FROM roles LEFT JOIN departments ON roles.department_id = departments.id`;
@@ -89,8 +66,8 @@ function viewRoles(){
           return;
       }
       console.table('\n',rows,'\n');
+      main();
       });
-  main();
 };
 
 function addRole(){
@@ -119,8 +96,8 @@ function addRole(){
           db.query(sql, params, (err, result)=>{
               if(err) throw err;
               console.log(`n${newRole.title} has been added.`);
+              main();
           });
-          userAction();
       })
   })    
 }
@@ -151,34 +128,11 @@ function updateRole(){
               db.query(sql, params, (err, result)=>{
                   if(err)throw err
                   console.log('Employee role updated.');
+                  main();
               });
-               main();
           })
       })
   });
-};
-
-function deleteRole(){
-  db.query(`SELECT*FROM roles`, (err, res)=>{
-      if(err) throw err;    
-      const roleList = res.map(roles => ({name:roles.title, value: roles.id}));
-          return inquirer.prompt([
-              {
-                  type:'list',
-                  name:'role',
-                  message:'What role do you wish to remove?',
-                  choices: roleList
-              }
-          ]).then(delRole=>{
-              const sql = `DELETE FROM roles WHERE id = ?`;
-              const params = delRole.role
-              db.query(sql, params, (err, result)=>{
-                  if(err)throw err
-                  console.log(`\nRole Removed\n`)
-              });
-              main();
-          })
-  })
 };
 
 function allEmployees() {
@@ -187,8 +141,8 @@ function allEmployees() {
   db.query(sql, (err, rows) => {
     if (err) throw err;
     console.table('\n', rows, '\n');
+    main();
   });
-  main();
 };
 
 function addEmployee(){
@@ -224,33 +178,11 @@ function addEmployee(){
 
               db.query(sql, params, (err, result)=>{
                   if(err) throw err;
-                  console.log(`${newEmployee,first_name} ${newEmployee.last_name} has been added.`)
+                  console.log(`${newEmployee.first_name} ${newEmployee.last_name} has been added.`);
+                  main();
               });
-              main();
+              
           })        
-      })
-  })
-};
-
-function deleteEmployee(){
-  db.query(`SELECT*FROM employee`, (err, res)=>{
-      if (err) throw err;
-      const employeeList = res.map(employees => ({name: employees.first_name+' '+employees.last_name, value:employees.id}));
-      return inquirer.prompt([
-          {
-              type:'list',
-              name:'employee',
-              message:'What employee would you like to remove?',
-              choices: employeeList
-          }
-      ]).then(delEmploy=>{
-          const sql = `DELETE FROM employee WHERE id = ?`;
-          const params =delEmploy.employee
-          db.query(sql, params, (err, result)=>{
-              if(err) throw err;
-              console.log(`\nEmployee Removed\n`)            
-          });
-          main();
       })
   })
 };
@@ -278,14 +210,15 @@ function updateRoleSalary(){
           db.query(sql, params, (err, result)=>{
               if(err) throw err;
               console.log('Salary updated')
-          });
-          main();
+                main();
+            });
       }) 
   })
 };
 
 function main() {
-  console.log('----------')
+    // console.clear();
+  console.log('------------------------------------------------')
   return inquirer.prompt([
       {
       type:'list',
@@ -293,7 +226,6 @@ function main() {
       message:'What would you like to do?  To Exit: Use Ctrl+C',
       choices:['View All Departments','View All Roles','View All Employees', 
       'Add A Department','Add A Role','Add An Employee',
-      'Delete A Department','Delete A Role','Delete An Employee',
       'Update A Salary','Update An Employee Role','Quit']
       }
   ]).then(actions=>{
@@ -316,15 +248,6 @@ function main() {
           case "Add An Employee":
               addEmployee();
               break;
-          case "Delete A Department":
-              deleteDepartmenmt();
-              break;
-          case "Delete A Role":
-              deleteRole();
-              break;
-          case "Delete An Employee":
-              deleteEmployee();
-              break;
           case "Update A Salary":
               updateRoleSalary();
               break;
@@ -337,4 +260,3 @@ function main() {
       }})
 };
 main();
-
